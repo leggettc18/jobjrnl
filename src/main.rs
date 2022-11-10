@@ -7,5 +7,5 @@ fn main() {
         None,
         None,
     );
-    println!("{:?}", app)
+    println!("{}", app)
 }
