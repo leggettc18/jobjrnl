@@ -1,20 +1,27 @@
+use chrono::{DateTime, Local};
 use core::fmt;
 
 #[derive(Debug)]
 pub struct JobApplication {
     name: String,
-    date_applied: String,
+    date_applied: DateTime<Local>,
     resume_sent: bool,
     cover_letter_sent: bool,
-    response_received: Option<String>,
-    interview_date: Option<String>,
+    response_received: Option<DateTime<Local>>,
+    interview_date: Option<DateTime<Local>>,
 }
 
 impl fmt::Display for JobApplication {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Name: {}\nApplication Sent: {}\nResume Sent?: {}\nCover Letter Sent?: {}\nResponse Received: {}\nInterview Date: {}\n",
-            self.name, self.date_applied, if self.resume_sent { "yes" } else { "no" }, if self.cover_letter_sent { "yes" } else { "no" },
-            self.response_received.as_ref().unwrap_or(&String::from("n/a")), self.interview_date.as_ref().unwrap_or(&String::from("n/a"))
+        write!(
+            f,
+            "Name: {}\nApplication Sent: {}\nResume Sent?: {}\nCover Letter Sent?: {}\nResponse Received: {}\nInterview Date: {}\n",
+            self.name,
+            self.date_applied,
+            if self.resume_sent { "yes" } else { "no" },
+            if self.cover_letter_sent { "yes" } else { "no" },
+            if let Some(date) = self.response_received { date.to_string() } else { String::from("no") },
+            if let Some(date) = self.interview_date { date.to_string() } else { String::from("no") }
         )
     }
 }
@@ -22,11 +29,11 @@ impl fmt::Display for JobApplication {
 impl JobApplication {
     pub fn new(
         name: String,
-        date_applied: String,
+        date_applied: DateTime<Local>,
         resume_sent: bool,
         cover_letter_sent: bool,
-        response_received: Option<String>,
-        interview_date: Option<String>,
+        response_received: Option<DateTime<Local>>,
+        interview_date: Option<DateTime<Local>>,
     ) -> Self {
         Self {
             name,
