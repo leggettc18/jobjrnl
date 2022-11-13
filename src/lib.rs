@@ -1,14 +1,14 @@
-use chrono::{DateTime, Local};
+use chrono::{Local, NaiveDate};
 use core::fmt;
 
 #[derive(Debug)]
 pub struct JobApplication {
     name: String,
-    date_applied: DateTime<Local>,
+    date_applied: NaiveDate,
     resume_sent: bool,
     cover_letter_sent: bool,
-    response_received: Option<DateTime<Local>>,
-    interview_date: Option<DateTime<Local>>,
+    response_received: Option<NaiveDate>,
+    interview_date: Option<NaiveDate>,
 }
 
 impl fmt::Display for JobApplication {
@@ -29,19 +29,25 @@ impl fmt::Display for JobApplication {
 impl JobApplication {
     pub fn new(
         name: String,
-        date_applied: DateTime<Local>,
+        date_applied: Option<String>,
         resume_sent: bool,
         cover_letter_sent: bool,
-        response_received: Option<DateTime<Local>>,
-        interview_date: Option<DateTime<Local>>,
+        response_received: Option<String>,
+        interview_date: Option<String>,
     ) -> Self {
         Self {
             name,
-            date_applied,
+            date_applied: if let Some(date) = date_applied {
+                NaiveDate::parse_from_str(date.as_ref(), "%Y-%m-%d").unwrap()
+            } else {
+                Local::now().date_naive()
+            },
             resume_sent,
             cover_letter_sent,
-            response_received,
-            interview_date,
+            response_received: response_received
+                .map(|date| NaiveDate::parse_from_str(date.as_ref(), "%Y-%m-%d").unwrap()),
+            interview_date: interview_date
+                .map(|date| NaiveDate::parse_from_str(date.as_ref(), "%Y-%m-%d").unwrap()),
         }
     }
 }

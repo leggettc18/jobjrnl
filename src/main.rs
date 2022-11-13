@@ -1,5 +1,3 @@
-use chrono::Local;
-use chrono::TimeZone;
 use clap::Args;
 use clap::Parser;
 use clap::Subcommand;
@@ -41,26 +39,11 @@ fn main() {
         Some(Commands::New(cmd)) => {
             let app = jobjrnl::JobApplication::new(
                 cmd.name,
-                cmd.date
-                    .as_ref()
-                    .map(|date| {
-                        Local
-                            .datetime_from_str(date.as_ref(), "%Y-%m-%d %H:%M:%S")
-                            .unwrap()
-                    })
-                    .unwrap_or_else(Local::now),
+                cmd.date,
                 cmd.resume_sent,
                 cmd.coverletter_sent,
-                cmd.response_date.as_ref().map(|date| {
-                    Local
-                        .datetime_from_str(date.as_ref(), "%Y-%m-%d %H:%M:%S")
-                        .unwrap()
-                }),
-                cmd.response_date.map(|date| {
-                    Local
-                        .datetime_from_str(date.as_ref(), "%Y-%m-%d %H:%M:%S")
-                        .unwrap()
-                }),
+                cmd.response_date,
+                cmd.interview_date,
             );
             println!("{}", app)
         }
