@@ -6,7 +6,7 @@ use clap::Subcommand;
 #[command(author, version, about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
-    command: Option<Commands>,
+    command: Commands,
 }
 
 #[derive(Subcommand)]
@@ -36,7 +36,7 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Some(Commands::New(cmd)) => {
+        Commands::New(cmd) => {
             let app = jobjrnl::JobApplication::new(
                 cmd.name,
                 cmd.date,
@@ -47,6 +47,6 @@ fn main() {
             );
             println!("{}", app)
         }
-        None => {}
+        _ => {}
     }
 }
