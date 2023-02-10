@@ -34,7 +34,8 @@ struct NewCmd {
 
 fn main() {
     let cli = Cli::parse();
-
+    //TODO: remove linter exception when more subcommands exist
+    #[allow(clippy::single_match)]
     match cli.command {
         Commands::New(cmd) => {
             let app = jobjrnl::JobApplication::new(
@@ -47,6 +48,5 @@ fn main() {
             );
             println!("{}", app)
         }
-        _ => {}
     }
 }
