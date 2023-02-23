@@ -3,12 +3,12 @@ use core::fmt;
 
 #[derive(Debug)]
 pub struct JobApplication {
-    name: String,
-    date_applied: NaiveDate,
-    resume_sent: bool,
-    cover_letter_sent: bool,
-    response_received: Option<NaiveDate>,
-    interview_date: Option<NaiveDate>,
+    pub name: String,
+    pub date_applied: NaiveDate,
+    pub resume_sent: bool,
+    pub coverletter_sent: bool,
+    pub response_received: Option<NaiveDate>,
+    pub interview_date: Option<NaiveDate>,
 }
 
 impl fmt::Display for JobApplication {
@@ -19,7 +19,7 @@ impl fmt::Display for JobApplication {
             self.name,
             self.date_applied,
             if self.resume_sent { "yes" } else { "no" },
-            if self.cover_letter_sent { "yes" } else { "no" },
+            if self.coverletter_sent { "yes" } else { "no" },
             if let Some(date) = self.response_received { date.to_string() } else { String::from("no") },
             if let Some(date) = self.interview_date { date.to_string() } else { String::from("no") }
         )
@@ -31,7 +31,7 @@ impl JobApplication {
         name: String,
         date_applied: Option<String>,
         resume_sent: bool,
-        cover_letter_sent: bool,
+        coverletter_sent: bool,
         response_received: Option<String>,
         interview_date: Option<String>,
     ) -> Self {
@@ -43,7 +43,7 @@ impl JobApplication {
                 Local::now().date_naive()
             },
             resume_sent,
-            cover_letter_sent,
+            coverletter_sent,
             response_received: response_received
                 .map(|date| NaiveDate::parse_from_str(date.as_ref(), "%Y-%m-%d").unwrap()),
             interview_date: interview_date

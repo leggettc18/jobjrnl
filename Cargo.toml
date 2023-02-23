@@ -11,6 +11,8 @@ readme = "./README.md"
 
 [dependencies]
 chrono = "0.4.23"
+sqlx = { version = "0.6", features = [ "runtime-async-std-native-tls", "sqlite", "chrono" ] }
+async-std = { version = "1", features = [ "attributes" ] }
 
 [dependencies.clap]
 version = "4.0.23"
