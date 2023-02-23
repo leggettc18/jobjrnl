@@ -44,8 +44,6 @@ async fn main() -> Result<(), sqlx::Error> {
         .await?;
     sqlx::migrate!().run(&db_pool).await?;
     let cli = Cli::parse();
-    //TODO: remove linter exception when more subcommands exist
-    #[allow(clippy::single_match)]
     match cli.command {
         Commands::New(cmd) => {
             let app = jobjrnl::JobApplication::new(
@@ -56,7 +54,7 @@ async fn main() -> Result<(), sqlx::Error> {
                 cmd.response_date,
                 cmd.interview_date,
             );
-            let _id = add_application(&db_pool, &app).await?;
+            app.save(&db_pool).await?;
             println!("{}", app)
         }
         Commands::List(..) => {
@@ -72,7 +70,7 @@ async fn list_applications(pool: &sqlx::SqlitePool) -> Result<(), sqlx::Error> {
         SELECT id, name, date, resume_sent, coverletter_sent, response_date, interview_date
         FROM application
         ORDER BY id
-        "#
+        "#,
     )
     .fetch_all(pool)
     .await?;
@@ -90,23 +88,4 @@ async fn list_applications(pool: &sqlx::SqlitePool) -> Result<(), sqlx::Error> {
     }
 
     Ok(())
-}
-
-async fn add_application(
-    pool: &sqlx::SqlitePool,
-    app: &jobjrnl::JobApplication,
-) -> Result<i64, sqlx::Error> {
-    let mut conn = pool.acquire().await?;
-    let id = sqlx::query!(
-        r#"
-        INSERT INTO application (name, date, resume_sent, coverletter_sent, response_date, interview_date)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6);
-        "#,
-        app.name, app.date_applied, app.resume_sent, app.coverletter_sent, app.response_received, app.interview_date
-    )
-    .execute(&mut conn)
-    .await?
-    .last_insert_rowid();
-
-    Ok(id)
 }
