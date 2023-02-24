@@ -53,7 +53,7 @@ impl JobApplication {
         }
     }
 
-    pub async fn save<'a, DB, E>(&'a self, e: E) -> Result<(), sqlx::Error>
+    pub async fn create<'a, DB, E>(&'a self, e: E) -> Result<(), sqlx::Error>
     where
         DB: Database,
         <DB as HasArguments<'a>>::Arguments: IntoArguments<'a, DB>,

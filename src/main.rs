@@ -54,7 +54,7 @@ async fn main() -> Result<(), sqlx::Error> {
                 cmd.response_date,
                 cmd.interview_date,
             );
-            app.save(&db_pool).await?;
+            app.create(&db_pool).await?;
             println!("{}", app)
         }
         Commands::List(..) => {
