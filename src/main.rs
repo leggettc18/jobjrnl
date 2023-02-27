@@ -46,7 +46,7 @@ async fn main() -> Result<(), sqlx::Error> {
     let cli = Cli::parse();
     match cli.command {
         Commands::New(cmd) => {
-            let app = jobjrnl::JobApplication::new(
+            let mut app = jobjrnl::JobApplication::new(
                 cmd.name,
                 cmd.date,
                 cmd.resume_sent,
@@ -65,7 +65,8 @@ async fn main() -> Result<(), sqlx::Error> {
 }
 
 async fn list_applications(pool: &sqlx::SqlitePool) -> Result<(), sqlx::Error> {
-    let recs = sqlx::query!(
+    let recs = sqlx::query_as!(
+        jobjrnl::JobApplication,
         r#"
         SELECT id, name, date, resume_sent, coverletter_sent, response_date, interview_date
         FROM application
@@ -76,15 +77,7 @@ async fn list_applications(pool: &sqlx::SqlitePool) -> Result<(), sqlx::Error> {
     .await?;
 
     for rec in recs {
-        let app = jobjrnl::JobApplication::new(
-            rec.name,
-            Some(rec.date),
-            rec.resume_sent,
-            rec.coverletter_sent,
-            rec.response_date,
-            rec.interview_date,
-        );
-        println!("|{}| {}", rec.id, app);
+        println!("{}", rec);
     }
 
     Ok(())
