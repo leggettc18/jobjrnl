@@ -1,8 +1,8 @@
 use async_trait::async_trait;
-use sqlx::types::chrono::Local;
 use core::fmt;
+use sqlx::types::chrono::Local;
 use sqlx::{database::HasArguments, Database, Executor, IntoArguments};
-use sqlx::{Encode, Type, Row, FromRow, Decode, ColumnIndex};
+use sqlx::{ColumnIndex, Decode, Encode, FromRow, Row, Type};
 
 #[derive(Debug)]
 pub struct JobApplication {
@@ -31,7 +31,7 @@ impl fmt::Display for JobApplication {
     }
 }
 
-impl <'r, R> FromRow<'r, R> for JobApplication
+impl<'r, R> FromRow<'r, R> for JobApplication
 where
     R: Row,
     for<'c> &'c str: ColumnIndex<R>,
@@ -47,7 +47,7 @@ where
             row.try_get("resume_sent")?,
             row.try_get("coverletter_sent")?,
             row.try_get("response_date")?,
-            row.try_get("interview_date")?
+            row.try_get("interview_date")?,
         );
         app.id = row.try_get("id")?;
         Ok(app)
@@ -77,46 +77,31 @@ impl JobApplication {
             interview_date,
         }
     }
-
-    pub async fn create<'a, DB, Pool>(&'a mut self, pool: Pool) -> Result<(), sqlx::Error>
-    where
-        DB: Database,
-        <DB as HasArguments<'a>>::Arguments: IntoArguments<'a, DB>,
-        Pool: 'a + Executor<'a, Database = DB>,
-        for<'c> String: Encode<'c, DB> + Type<DB>,
-        for<'c> bool: Encode<'c, DB> + Type<DB>,
-        for<'c> Option<String>: Encode<'c, DB> + Type<DB>,
-        for<'c> i64: Decode<'c, DB> + Type<DB>,
-        for<'c> usize: ColumnIndex<DB::Row>,
-        for<'c> &'c str: ColumnIndex<DB::Row>,
-    {
-        let result = sqlx::query(
-        r#"
-        INSERT INTO application (name, date, resume_sent, coverletter_sent, response_date, interview_date)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6)
-        RETURNING id
-        "#)
-        .bind(&self.name)
-        .bind(&self.date)
-        .bind(self.resume_sent)
-        .bind(self.coverletter_sent) 
-        .bind(&self.response_date)
-        .bind(&self.interview_date)
-        .fetch_all(pool)
-        .await?;
-        self.id = result[0].try_get("id")?;
-        Ok(())
-    }
 }
 
 #[async_trait]
 pub trait CRUDable<DB: sqlx::Database> {
+    async fn create(&mut self, db: &sqlx::Pool<DB>) -> Result<(), sqlx::Error>;
     async fn list(db: &sqlx::Pool<DB>) -> Result<Vec<JobApplication>, sqlx::Error>;
 }
 
 #[async_trait]
 impl CRUDable<sqlx::Sqlite> for JobApplication {
-   async fn list(db: &sqlx::Pool<sqlx::Sqlite>) -> Result<Vec<JobApplication>, sqlx::Error> {
+    async fn create(&mut self, db: &sqlx::Pool<sqlx::Sqlite>) -> Result<(), sqlx::Error> {
+        let result = sqlx::query!(
+            r#"
+            INSERT INTO application (name, date, resume_sent, coverletter_sent, response_date, interview_date)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+            "#,
+            self.name, self.date, self.resume_sent, self.coverletter_sent, self.response_date, self.interview_date
+        )
+        .execute(db)
+        .await?;
+        self.id = result.last_insert_rowid();
+        Ok(())
+    }
+
+    async fn list(db: &sqlx::Pool<sqlx::Sqlite>) -> Result<Vec<JobApplication>, sqlx::Error> {
         let recs = sqlx::query_as!(
             JobApplication,
             r#"
@@ -128,7 +113,6 @@ impl CRUDable<sqlx::Sqlite> for JobApplication {
         .fetch_all(db)
         .await?;
         Ok(recs)
-
     }
 }
 
