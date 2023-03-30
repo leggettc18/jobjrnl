@@ -1,8 +1,7 @@
 use async_trait::async_trait;
 use core::fmt;
 use sqlx::types::chrono::Local;
-use sqlx::{database::HasArguments, Database, Executor, IntoArguments};
-use sqlx::{ColumnIndex, Decode, Encode, FromRow, Row, Type};
+use sqlx::{ColumnIndex, Decode, FromRow, Row, Type};
 
 #[derive(Debug)]
 pub struct JobApplication {
