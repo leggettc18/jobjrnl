@@ -133,11 +133,11 @@ impl CRUDable<sqlx::Sqlite> for JobApplication {
         Ok(result)
     }
 
-    async fn update(&self, db: &sqlx::Pool<sqlx::Sqlite>) -> Result<(), sqlx::Error> {
+    async fn update(&self, _db: &sqlx::Pool<sqlx::Sqlite>) -> Result<(), sqlx::Error> {
         todo!();
     }
 
-    async fn delete(&self, db: &sqlx::Pool<sqlx::Sqlite>) -> Result<(), sqlx::Error> {
+    async fn delete(&self, _db: &sqlx::Pool<sqlx::Sqlite>) -> Result<(), sqlx::Error> {
         todo!();
     }
 }
