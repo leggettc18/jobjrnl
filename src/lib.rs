@@ -118,7 +118,19 @@ impl CRUDable<sqlx::Sqlite> for JobApplication {
     }
 
     async fn get(db: &sqlx::Pool<sqlx::Sqlite>, id: i64) -> Result<JobApplication, sqlx::Error> {
-        todo!();
+        let result = sqlx::query_as!(
+            JobApplication,
+            r#"
+            SELECT id, name, date, resume_sent, coverletter_sent, response_date, interview_date
+            FROM application
+            WHERE id = ?1
+            ORDER BY id
+            "#,
+            id
+        )
+        .fetch_one(db)
+        .await?;
+        Ok(result)
     }
 
     async fn update(&self, db: &sqlx::Pool<sqlx::Sqlite>) -> Result<(), sqlx::Error> {

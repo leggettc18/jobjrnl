@@ -15,10 +15,16 @@ struct Cli {
 enum Commands {
     New(NewCmd),
     List(ListCmd),
+    Get(GetCmd),
 }
 
 #[derive(Args)]
 struct ListCmd {}
+
+#[derive(Args)]
+struct GetCmd {
+    id: i64,
+}
 
 #[derive(Args)]
 struct NewCmd {
@@ -63,6 +69,10 @@ async fn main() -> Result<(), sqlx::Error> {
             for rec in recs {
                 println!("{}", rec);
             }
+        }
+        Commands::Get(cmd) => {
+            let rec = jobjrnl::JobApplication::get(&db_pool, cmd.id).await?;
+            println!("{}", rec);
         }
     }
     Ok(())
