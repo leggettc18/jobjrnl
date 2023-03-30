@@ -82,6 +82,9 @@ impl JobApplication {
 pub trait CRUDable<DB: sqlx::Database> {
     async fn create(&mut self, db: &sqlx::Pool<DB>) -> Result<(), sqlx::Error>;
     async fn list(db: &sqlx::Pool<DB>) -> Result<Vec<JobApplication>, sqlx::Error>;
+    async fn get(db: &sqlx::Pool<DB>, id: i64) -> Result<JobApplication, sqlx::Error>;
+    async fn update(&self, db: &sqlx::Pool<DB>) -> Result<(), sqlx::Error>;
+    async fn delete(&self, db: &sqlx::Pool<DB>) -> Result<(), sqlx::Error>;
 }
 
 #[async_trait]
@@ -112,6 +115,18 @@ impl CRUDable<sqlx::Sqlite> for JobApplication {
         .fetch_all(db)
         .await?;
         Ok(recs)
+    }
+
+    async fn get(db: &sqlx::Pool<sqlx::Sqlite>, id: i64) -> Result<JobApplication, sqlx::Error> {
+        todo!();
+    }
+
+    async fn update(&self, db: &sqlx::Pool<sqlx::Sqlite>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+
+    async fn delete(&self, db: &sqlx::Pool<sqlx::Sqlite>) -> Result<(), sqlx::Error> {
+        todo!();
     }
 }
 
