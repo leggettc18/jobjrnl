@@ -1,4 +1,4 @@
-
+use async_trait::async_trait;
 use sqlx::types::chrono::Local;
 use core::fmt;
 use sqlx::{database::HasArguments, Database, Executor, IntoArguments};
@@ -106,6 +106,29 @@ impl JobApplication {
         .await?;
         self.id = result[0].try_get("id")?;
         Ok(())
+    }
+}
+
+#[async_trait]
+pub trait CRUDable<DB: sqlx::Database> {
+    async fn list(db: &sqlx::Pool<DB>) -> Result<Vec<JobApplication>, sqlx::Error>;
+}
+
+#[async_trait]
+impl CRUDable<sqlx::Sqlite> for JobApplication {
+   async fn list(db: &sqlx::Pool<sqlx::Sqlite>) -> Result<Vec<JobApplication>, sqlx::Error> {
+        let recs = sqlx::query_as!(
+            JobApplication,
+            r#"
+            SELECT id, name, date, resume_sent, coverletter_sent, response_date, interview_date
+            FROM application
+            ORDER BY id
+            "#
+        )
+        .fetch_all(db)
+        .await?;
+        Ok(recs)
+
     }
 }
 

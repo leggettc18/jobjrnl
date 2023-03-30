@@ -1,6 +1,7 @@
 use clap::Args;
 use clap::Parser;
 use clap::Subcommand;
+use jobjrnl::CRUDable;
 use sqlx::sqlite::SqlitePoolOptions;
 
 #[derive(Parser)]
@@ -58,27 +59,11 @@ async fn main() -> Result<(), sqlx::Error> {
             println!("{}", app)
         }
         Commands::List(..) => {
-            list_applications(&db_pool).await?;
+            let recs = jobjrnl::JobApplication::list(&db_pool).await?;
+            for rec in recs {
+                println!("{}", rec);
+            }
         }
     }
-    Ok(())
-}
-
-async fn list_applications(pool: &sqlx::SqlitePool) -> Result<(), sqlx::Error> {
-    let recs = sqlx::query_as!(
-        jobjrnl::JobApplication,
-        r#"
-        SELECT id, name, date, resume_sent, coverletter_sent, response_date, interview_date
-        FROM application
-        ORDER BY id
-        "#,
-    )
-    .fetch_all(pool)
-    .await?;
-
-    for rec in recs {
-        println!("{}", rec);
-    }
-
     Ok(())
 }
