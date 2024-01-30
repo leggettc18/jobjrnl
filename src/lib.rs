@@ -8,6 +8,7 @@ pub struct JobApplication {
     pub id: i64,
     pub name: String,
     pub date: String,
+    pub description: String,
     pub resume_sent: bool,
     pub coverletter_sent: bool,
     pub response_date: Option<String>,
@@ -18,14 +19,15 @@ impl fmt::Display for JobApplication {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "ID: {}\nName: {}\nApplication Sent: {}\nResume Sent?: {}\nCover Letter Sent?: {}\nResponse Received: {}\nInterview Date: {}\n",
+            "ID: {}\nName: {}\nApplication Sent: {}\nResume Sent?: {}\nCover Letter Sent?: {}\nResponse Received: {}\nInterview Date: {}\nDescription: {}",
             self.id,
             self.name,
             self.date,
             if self.resume_sent { "yes" } else { "no" },
             if self.coverletter_sent { "yes" } else { "no" },
             if let Some(date) = &self.response_date { date.to_string() } else { String::from("no") },
-            if let Some(date) = &self.interview_date { date.to_string() } else { String::from("no") }
+            if let Some(date) = &self.interview_date { date.to_string() } else { String::from("no") },
+            self.description
         )
     }
 }
@@ -43,6 +45,7 @@ where
         let mut app = JobApplication::new(
             row.try_get("name")?,
             row.try_get("date")?,
+            row.try_get("description")?,
             row.try_get("resume_sent")?,
             row.try_get("coverletter_sent")?,
             row.try_get("response_date")?,
@@ -56,6 +59,7 @@ where
 impl JobApplication {
     pub fn new(
         name: String,
+        description: Option<String>,
         date_applied: Option<String>,
         resume_sent: bool,
         coverletter_sent: bool,
@@ -65,6 +69,11 @@ impl JobApplication {
         Self {
             id: 0,
             name,
+            description: if let Some(description) = description {
+                description
+            } else {
+                "".to_string()
+            },
             date: if let Some(date) = date_applied {
                 date
             } else {
@@ -92,10 +101,10 @@ impl CRUDable<sqlx::Sqlite> for JobApplication {
     async fn create(&mut self, db: &sqlx::Pool<sqlx::Sqlite>) -> Result<(), sqlx::Error> {
         let result = sqlx::query!(
             r#"
-            INSERT INTO application (name, date, resume_sent, coverletter_sent, response_date, interview_date)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+            INSERT INTO application (name, date, description, resume_sent, coverletter_sent, response_date, interview_date)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
             "#,
-            self.name, self.date, self.resume_sent, self.coverletter_sent, self.response_date, self.interview_date
+            self.name, self.date, self.description, self.resume_sent, self.coverletter_sent, self.response_date, self.interview_date
         )
         .execute(db)
         .await?;
@@ -107,7 +116,7 @@ impl CRUDable<sqlx::Sqlite> for JobApplication {
         let recs = sqlx::query_as!(
             JobApplication,
             r#"
-            SELECT id, name, date, resume_sent, coverletter_sent, response_date, interview_date
+            SELECT id, name, date, description, resume_sent, coverletter_sent, response_date, interview_date
             FROM application
             ORDER BY id
             "#
@@ -121,7 +130,7 @@ impl CRUDable<sqlx::Sqlite> for JobApplication {
         let result = sqlx::query_as!(
             JobApplication,
             r#"
-            SELECT id, name, date, resume_sent, coverletter_sent, response_date, interview_date
+            SELECT id, name, date, description, resume_sent, coverletter_sent, response_date, interview_date
             FROM application
             WHERE id = ?1
             ORDER BY id

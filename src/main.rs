@@ -29,6 +29,7 @@ struct GetCmd {
 #[derive(Args)]
 struct NewCmd {
     name: String,
+    description: Option<String>,
     date: Option<String>,
 
     #[arg(long)]
@@ -55,6 +56,7 @@ async fn main() -> Result<(), sqlx::Error> {
         Commands::New(cmd) => {
             let mut app = jobjrnl::JobApplication::new(
                 cmd.name,
+                cmd.description,
                 cmd.date,
                 cmd.resume_sent,
                 cmd.coverletter_sent,
