@@ -68,9 +68,7 @@ async fn main() -> Result<(), sqlx::Error> {
         }
         Commands::List(..) => {
             let recs = jobjrnl::JobApplication::list(&db_pool).await?;
-            for rec in recs {
-                println!("{}", rec);
-            }
+            println!("{}", jobjrnl::JobApplicationList(recs));
         }
         Commands::Get(cmd) => {
             let rec = jobjrnl::JobApplication::get(&db_pool, cmd.id).await?;

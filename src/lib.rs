@@ -32,6 +32,44 @@ impl fmt::Display for JobApplication {
     }
 }
 
+#[derive(Debug)]
+pub struct JobApplicationList(pub Vec<JobApplication>);
+
+impl fmt::Display for JobApplicationList {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "ID   | Application Sent | Resume Sent? | Cover Letter Sent? | Response Received | Interview Date",
+        )?;
+        writeln!(
+            f,
+            "-----|------------------|--------------|--------------------|-------------------|---------------",
+        )?;
+        let apps = &self.0;
+        for (_, app) in apps.iter().enumerate() {
+            writeln!(
+                f,
+                "{:<4} | {:<16} | {:<12} | {:<18} | {:<17} | {:<14}",
+                app.id,
+                app.date,
+                app.resume_sent,
+                app.coverletter_sent,
+                if let Some(date) = &app.response_date {
+                    date.to_string()
+                } else {
+                    String::from("no")
+                },
+                if let Some(date) = &app.interview_date {
+                    date.to_string()
+                } else {
+                    String::from("no")
+                }
+            )?;
+        }
+        writeln!(f, "Count: {}", &self.0.len())
+    }
+}
+
 impl<'r, R> FromRow<'r, R> for JobApplication
 where
     R: Row,
